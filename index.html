@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>websocket练习</title>
+</head>
+<body>
+
+<img src="" id="capture" alt="">
+
+</body>
+<script>
+window.onload = function(){
+    let vedio = document.getElementById('capture')
+    var ws = new WebSocket('ws://localhost:8765');
+    ws.onopen = function () {
+        ws.send('the request from client');
+    };
+    ws.onmessage = function (e) {
+        // console.log('from server: ' + e.data);
+        vedio.setAttribute('src', e.data)
+
+    };
+}
+
+</script>
+</html>

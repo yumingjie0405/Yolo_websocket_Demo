@@ -18,7 +18,7 @@ model = YOLO('yolov8s.pt')
 '''
 # rtsp_path = "videos/example.mp4"
 # rtsp_path ="https://open.ys7.com/v3/openlive/K10170061_1_1.m3u8?expire=1717206565&id=586491899410382848&t=e862caf9959031a4c7b74c33388f2dcbf7bf5f358c5ed4022861c20aa1766100&ev=100"
-rtsp_path = 2
+rtsp_path = 0
 camera1 = None
 frame = None
 base64img = ''
@@ -61,7 +61,7 @@ def vedioCapture_thread2(n):
             last_time = current_time
 
             # Run YOLOv8 inference on the frame
-            results = model(img_bgr, conf=0.7, device=0, classes=0)
+            results = model(img_bgr, conf=0.7, device='cuda:0', classes=0)
             annotated_frame = results[0].plot(conf=True, line_width=2, font_size=2)
 
             # 计算检测到的人数
@@ -132,5 +132,5 @@ try:
 except KeyboardInterrupt:
     print("Shutting down gracefully...")
 
-from_vedio()
-asyncio.run(main())
+# from_vedio()
+# asyncio.run(main())

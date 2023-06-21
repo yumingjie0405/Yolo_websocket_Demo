@@ -3,11 +3,11 @@
 <head>
 </head>
 <body>
-<!--<img id="image" width="640" height="480">-->
-<img id="image" width="1920" height="1080">
+<img id="image" width="640" height="480">
+<!--<img id="image" width="1920" height="1080">-->
 <script>
     let image = document.getElementById("image");
-    let ws = new WebSocket("ws://localhost:8766");
+    let ws = new WebSocket("ws://localhost:8767");
 
     ws.onmessage = (event) => {
         image.src = event.data;

@@ -17,9 +17,9 @@ model = YOLO('yolov8s.pt')
 # cap = cv2.VideoCapture("https://open.ys7.com/v3/openlive/K10170061_1_1.m3u8?expire=1717206565&id=586491899410382848&t=e862caf9959031a4c7b74c33388f2dcbf7bf5f358c5ed4022861c20aa1766100&ev=100")
 # cap = cv2.VideoCapture("MOT16-03.mp4")
 '''
-rtsp_path = "videos/bridge-short.mp4"
+# rtsp_path = "videos/bridge-short.mp4"
 # rtsp_path ="https://open.ys7.com/v3/openlive/K10170061_1_1.m3u8?expire=1717206565&id=586491899410382848&t=e862caf9959031a4c7b74c33388f2dcbf7bf5f358c5ed4022861c20aa1766100&ev=100"
-# rtsp_path = 0
+rtsp_path = 0
 camera1 = None
 frame = None
 base64img = ''
@@ -42,10 +42,11 @@ def put_chinese_text(image, text, position, font_path, font_size, color):
 #     np.array([[600, 680], [927, 680], [851, 950], [42, 950]]),
 #     np.array([[987, 680], [1350, 680], [1893, 950], [1015, 950]])
 # ]
+#绘制一个在640*480分辨率下的多边形区域
 polygons = [
-    np.array([[600, 680], [927, 680], [851, 950], [42, 950]]),
-    np.array([[987, 680], [1350, 680], [1893, 950], [1015, 950]])
+    np.array([[320, 240], [620, 240], [560, 440], [60, 440]])
 ]
+
 
 
 # 视频获取和处理
@@ -75,9 +76,8 @@ def vedioCapture_thread2(n):
                 current_time = time.time()
                 fps = 1 / (current_time - last_time)
                 last_time = current_time
-
-                zones = [sv.PolygonZone(polygon=polygon, frame_resolution_wh=(width, height)) for polygon in
-                         polygons]
+                print('FPS: ', fps)
+                zones = [sv.PolygonZone(polygon=polygon, frame_resolution_wh=(width, height)) for polygon in polygons]
                 # 配色方案
                 colors = sv.ColorPalette.default()
                 # 区域可视化，每个区域配一个 PolygonZoneAnnotator
@@ -86,44 +86,38 @@ def vedioCapture_thread2(n):
                                             text_scale=4)
                     for index, zone in enumerate(zones)
                 ]
-
                 # 目标检测可视化，每个区域配一个 BoxAnnotator
                 box_annotators = [
                     sv.BoxAnnotator(color=colors.by_idx(index), thickness=2, text_thickness=4, text_scale=2)
                     for index in range(len(polygons))
                 ]
-
                 # YOLOV8 推理预测
-                results = model(img_bgr, imgsz=640, verbose=False, show=False, device='cuda:0')[0]
-
+                results = model(img_bgr, imgsz=640, verbose=False, show=False, device='cuda:0',classes=0)[0]
                 # 用 supervision 解析预测结果
                 detections = sv.Detections.from_yolov8(results)
-
                 # 遍历每个区域对应的所有 Annotator
                 for zone, zone_annotator, box_annotator in zip(zones, zone_annotators, box_annotators):
                     # 判断目标是否在区域内
                     mask = zone.trigger(detections=detections)
                     # print(zone.current_count)
                     # 筛选出在区域内的目标+
-
                     detections_filtered = detections[mask]
-
                     # 画框
                     frame = box_annotator.annotate(scene=frame, detections=detections_filtered, skip_label=True)
-
                     # 画区域，并写区域内目标个数
                     frame = zone_annotator.annotate(scene=frame)
             # Check if the video has reached the end
             current_frame = camera1.get(cv2.CAP_PROP_POS_FRAMES)
             frames = camera1.get(cv2.CAP_PROP_FRAME_COUNT)
             # print("current_frame:{}  frames:{}".format(current_frame,frames))
-            if current_frame == frames-3:
+            if current_frame == frames - 3:
 
                 if camera1.isOpened():
                     camera1.set(cv2.CAP_PROP_POS_FRAMES, 0)  # Set video position to the beginning
                     print('reset')
                 else:
                     print("Invalid video capture object")
+                    print("End of the video file...")
 
 
 def vedioSend_thread1(n):

@@ -17,9 +17,9 @@ model = YOLO('yolov8s.pt')
 # cap = cv2.VideoCapture("https://open.ys7.com/v3/openlive/K10170061_1_1.m3u8?expire=1717206565&id=586491899410382848&t=e862caf9959031a4c7b74c33388f2dcbf7bf5f358c5ed4022861c20aa1766100&ev=100")
 # cap = cv2.VideoCapture("MOT16-03.mp4")
 '''
-# rtsp_path = "videos/bridge-short.mp4"
+rtsp_path = "videos/bridge-short.mp4"
 # rtsp_path ="https://open.ys7.com/v3/openlive/K10170061_1_1.m3u8?expire=1717206565&id=586491899410382848&t=e862caf9959031a4c7b74c33388f2dcbf7bf5f358c5ed4022861c20aa1766100&ev=100"
-rtsp_path = 0
+# rtsp_path = 0
 camera1 = None
 frame = None
 base64img = ''
@@ -38,14 +38,14 @@ def put_chinese_text(image, text, position, font_path, font_size, color):
 
 
 # 制定绘制的多边形区域
-# polygons = [
-#     np.array([[600, 680], [927, 680], [851, 950], [42, 950]]),
-#     np.array([[987, 680], [1350, 680], [1893, 950], [1015, 950]])
-# ]
-#绘制一个在640*480分辨率下的多边形区域
 polygons = [
-    np.array([[320, 240], [620, 240], [560, 440], [60, 440]])
+    np.array([[600, 680], [927, 680], [851, 950], [42, 950]]),
+    np.array([[987, 680], [1350, 680], [1893, 950], [1015, 950]])
 ]
+#绘制一个在640*480分辨率下的多边形区域
+# polygons = [
+#     np.array([[320, 240], [620, 240], [560, 440], [60, 440]])
+# ]
 
 
 
@@ -92,7 +92,7 @@ def vedioCapture_thread2(n):
                     for index in range(len(polygons))
                 ]
                 # YOLOV8 推理预测
-                results = model(img_bgr, imgsz=640, verbose=False, show=False, device='cuda:0',classes=0)[0]
+                results = model(img_bgr, imgsz=640, verbose=False, show=False, device='cuda:0')[0]
                 # 用 supervision 解析预测结果
                 detections = sv.Detections.from_yolov8(results)
                 # 遍历每个区域对应的所有 Annotator

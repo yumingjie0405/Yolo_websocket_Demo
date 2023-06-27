@@ -30,8 +30,8 @@ speed = 0.001  # 视频帧率 表示多少秒一帧
 frame_lock = threading.Lock()
 
 # 越线检测位置
-LINE_START = sv.Point(50, 300)
-LINE_END = sv.Point(550, 300)
+LINE_START = sv.Point(320,50)
+LINE_END = sv.Point(320, 300)
 line_counter = sv.LineZone(start=LINE_START, end=LINE_END)
 
 # 线的可视化配置
@@ -155,7 +155,7 @@ async def sendImg(websocket, path):
 
 
 async def main():
-    async with websockets.serve(sendImg, "localhost", 8766):
+    async with websockets.serve(sendImg, "localhost", 8767):
         await asyncio.Future()  # run forever
 
 

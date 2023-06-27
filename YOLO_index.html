@@ -7,14 +7,16 @@
 <!--居中显示-->
 <style>
     body {
+        width: 100%;
+        height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
     }
 </style>
 
-<img id="image" width="640" height="480">
-<!--<img id="image" width="1920" height="1080">-->
+<!--<img id="image" width="640" height="480">-->
+<img id="image" width="100%" height="100%">
 <script>
     let image = document.getElementById("image");
     let ws = new WebSocket("ws://localhost:8767");

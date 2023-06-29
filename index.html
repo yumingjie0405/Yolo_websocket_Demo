@@ -2,26 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>websocket练习</title>
+    <title>WebSocket练习</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #capture {
+            width: 800px; /* 调整视频宽度 */
+            height: auto; /* 根据宽度等比例缩放 */
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
+    <video id="capture" autoplay></video>
+    <div class="buttons">
+        <button id="cameraButton" onclick="switchToCamera()">切换到摄像头</button>
+        <input type="file" id="fileInput" accept="video/*">
+        <button id="videoButton" onclick="sendVideo()">选择视频文件并播放</button>
+    </div>
 
-<img src="" id="capture" alt="">
+    <script>
+        var video = document.getElementById('capture');
+        var ws = new WebSocket('ws://localhost:8765');
+        var isCamera = true;
 
+        ws.onopen = function () {
+            ws.send('the request from client');
+        };
+
+        ws.onmessage = function (event) {
+            if (isCamera) {
+                video.src = event.data;
+            } else {
+                console.log("收到数据:", event.data);
+            }
+        };
+
+        function switchToCamera() {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send('switchToCamera');
+                isCamera = true;
+                console.log("切换到摄像头");
+            } else {
+                console.log("WebSocket连接尚未建立");
+            }
+        }
+
+        function sendVideo() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (event) {
+                var videoData = event.target.result;
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(videoData);
+                } else {
+                    console.log("WebSocket连接尚未建立");
+                }
+            };
+
+            if (file) {
+                reader.readAsArrayBuffer(file);
+            }
+        };
+    </script>
 </body>
-<script>
-window.onload = function(){
-    let vedio = document.getElementById('capture')
-    var ws = new WebSocket('ws://localhost:8765');
-    ws.onopen = function () {
-        ws.send('the request from client');
-    };
-    ws.onmessage = function (e) {
-        // console.log('from server: ' + e.data);
-        vedio.setAttribute('src', e.data)
-
-    };
-}
-
-</script>
 </html>

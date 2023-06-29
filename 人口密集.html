@@ -40,6 +40,7 @@
             socket = new WebSocket("ws://localhost:8767");
 
             socket.onmessage = function (event) {
+                console.log("receive message from server", event.data);
                 var imgElement = document.getElementById("video-stream");
                 imgElement.src = event.data;
             };
@@ -68,13 +69,26 @@
     })();
 
     function switchToCamera() {
-        // 切换到摄像头的逻辑
-        // ...
+        // 发送切换到摄像头的信号给后端
+        console.log("switch to camera");
+        WebSocketModule.send("switch_to_camera");
     }
 
     function sendVideo() {
-        // 选择视频文件并播放的逻辑
-        // ...
+        var fileInput = document.getElementById("fileInput");
+        var file = fileInput.files[0];
+
+        if (file) {
+            var reader = new FileReader();
+
+            reader.onload = function (event) {
+                var videoData = event.target.result;
+                // 发送选择的视频文件数据给后端
+                WebSocketModule.send(videoData);
+            };
+
+            reader.readAsDataURL(file);
+        }
     }
 
     // 页面加载完成后初始化WebSocket连接

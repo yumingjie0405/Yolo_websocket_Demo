@@ -5,12 +5,12 @@ import cv2
 import asyncio
 import websockets
 
-rtsp_path = 0
+rtsp_path = 'videos/example.mp4'  # RTSP路径或摄像头索引
 camera1 = None
 frame = None
 base64img = ''
 flag = True
-speed = 0.1 # 视频帧率 表示多少秒一帧
+speed = 0.01 # 视频帧率 表示多少秒一帧
 
 # 视频获取
 def vedioCapture_thread2(n):
@@ -68,7 +68,7 @@ async def sendImg(websocket, path):
 async def main():
     # start a websocket server
 
-    async with websockets.serve(sendImg, "localhost", 8765):
+    async with websockets.serve(sendImg, "localhost", 8767):
         await asyncio.Future()  # run forever
 
 from_vedio()

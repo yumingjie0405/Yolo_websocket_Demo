@@ -1,4 +1,3 @@
-import threading
 import base64
 import cv2
 import asyncio
@@ -17,7 +16,7 @@ model = YOLO('yolov8s.pt')
 # cap = cv2.VideoCapture("https://open.ys7.com/v3/openlive/K10170061_1_1.m3u8?expire=1717206565&id=586491899410382848&t=e862caf9959031a4c7b74c33388f2dcbf7bf5f358c5ed4022861c20aa1766100&ev=100")
 # cap = cv2.VideoCapture("MOT16-03.mp4")
 '''
-rtsp_path = "videos/example.mp4"
+rtsp_path = "videos/bridge-short.mp4"
 # rtsp_path ="https://open.ys7.com/v3/openlive/K10170061_1_1.m3u8?expire=1717206565&id=586491899410382848&t=e862caf9959031a4c7b74c33388f2dcbf7bf5f358c5ed4022861c20aa1766100&ev=100"
 # rtsp_path = 0
 camera1 = None
@@ -38,7 +37,6 @@ def put_chinese_text(image, text, position, font_path, font_size, color):
 
 
 # 制定绘制的多边形区域
-# 车流越线计数-上海漕河泾宜山路隧道
 polygons = [
     np.array([[600, 680], [927, 680], [851, 950], [42, 950]]),
     np.array([[987, 680], [1350, 680], [1893, 950], [1015, 950]])
@@ -53,11 +51,11 @@ polygons = [
 
 # 视频获取和处理
 
-def vedioCapture_thread2(n):
+async def vedioCapture():
     global camera1
+    global frame
 
     camera1 = cv2.VideoCapture(rtsp_path)
-    global frame
     play_video = True
     # Adding FPS calculation
     fps = 0
@@ -102,7 +100,7 @@ def vedioCapture_thread2(n):
                     # 判断目标是否在区域内
                     mask = zone.trigger(detections=detections)
                     # print(zone.current_count)
-                    # 筛选出在区域内的目标+
+                    # 筛选出在区域内的目标
                     detections_filtered = detections[mask]
                     # 画框
                     frame = box_annotator.annotate(scene=frame, detections=detections_filtered, skip_label=True)
@@ -122,11 +120,11 @@ def vedioCapture_thread2(n):
                     print("End of the video file...")
 
 
-def vedioSend_thread1(n):
+async def vedioSend(websocket):
     global base64img
     global flag
     print('send')
-    time.sleep(3)
+    await asyncio.sleep(3)
     while True:
         if frame is not None:  # Check if the frame is not empty
             image = cv2.imencode('.jpg', frame)[1]
@@ -134,14 +132,7 @@ def vedioSend_thread1(n):
             s = base64_data.decode()
             base64img = 'data:image/jpeg;base64,{}'.format(s)
             flag = True
-        time.sleep(speed)
-
-
-def from_vedio():
-    thread1 = threading.Thread(target=vedioSend_thread1, args=(1,))
-    thread1.start()
-    thread2 = threading.Thread(target=vedioCapture_thread2, args=(1,))
-    thread2.start()
+        await asyncio.sleep(speed)
 
 
 async def sendImg(websocket, path):
@@ -160,13 +151,19 @@ async def sendImg(websocket, path):
 
 
 async def main():
+    from_vedio_task = asyncio.create_task(from_vedio())
     async with websockets.serve(sendImg, "localhost", 8767):
-        await asyncio.Future()  # run forever
+        await from_vedio_task
 
 
-from_vedio()
+async def from_vedio():
+    capture_task = asyncio.create_task(vedioCapture())
+    send_task = asyncio.create_task(vedioSend())
+    await asyncio.gather(capture_task, send_task)
+
 
 try:
     asyncio.run(main())
 except KeyboardInterrupt:
     print("Shutting down gracefully...")
+

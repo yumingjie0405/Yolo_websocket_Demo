@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>WebSocket练习</title>
+    <title>视频来源调节</title>
     <style>
         body {
             display: flex;
@@ -24,7 +24,7 @@
     </style>
 </head>
 <body>
-<img id="video-stream" src="" alt="Video Stream">
+<video id="video-stream" src="" autoplay></video>
 <div class="buttons">
     <button id="cameraButton" onclick="switchToCamera()">切换到摄像头</button>
     <input type="file" id="fileInput" accept="video/*">
@@ -33,45 +33,57 @@
 
 <script>
     // WebSocket连接模块
-    var WebSocketModule = (function () {
-        var socket;
 
-        function init() {
-            socket = new WebSocket("ws://localhost:8767");
 
-            socket.onmessage = function (event) {
-                console.log("receive message from server", event.data);
-                var imgElement = document.getElementById("video-stream");
-                imgElement.src = event.data;
-            };
+    function initSendSocket() {
+        var sendSocket;
+        sendSocket = new WebSocket("ws://localhost:8765");
 
-            socket.onerror = function (event) {
-                console.error("WebSocket error: ", event);
-            };
-
-            socket.onclose = function (event) {
-                console.log("WebSocket connection closed");
-            };
-        }
-
-        function send(data) {
-            if (socket.readyState === WebSocket.OPEN) {
-                socket.send(data);
-            } else {
-                console.error("WebSocket connection is not open.");
-            }
-        }
-
-        return {
-            init: init,
-            send: send
+        sendSocket.onmessage = function (event) {
+            console.log("从服务器接收到消息", event.data);
+            var imgElement = document.getElementById("video-stream");
+            imgElement.src = event.data;
         };
-    })();
+
+        sendSocket.onerror = function (event) {
+            console.error("WebSocket错误：", event);
+        };
+
+        sendSocket.onclose = function (event) {
+            console.log("WebSocket连接已关闭");
+        };
+    }
+
+    function initReceiveSocket() {
+        var receiveSocket;
+        receiveSocket = new WebSocket("ws://localhost:8766");
+
+        receiveSocket.onmessage = function (event) {
+            console.log("从服务器接收到信号", event.data);
+            // 处理接收到的信号
+        };
+
+        receiveSocket.onerror = function (event) {
+            console.error("WebSocket错误：", event);
+        };
+
+        receiveSocket.onclose = function (event) {
+            console.log("WebSocket连接已关闭");
+        };
+    }
+
+    function sendSignal(signal) {
+        if (sendSocket.readyState === WebSocket.OPEN) {
+            sendSocket.send(signal);
+        } else {
+            console.error("WebSocket连接未打开。");
+        }
+    }
 
     function switchToCamera() {
         // 发送切换到摄像头的信号给后端
-        console.log("switch to camera");
-        WebSocketModule.send("switch_to_camera");
+        console.log("切换到摄像头");
+        sendSignal("switch_to_camera");
     }
 
     function sendVideo() {
@@ -84,7 +96,7 @@
             reader.onload = function (event) {
                 var videoData = event.target.result;
                 // 发送选择的视频文件数据给后端
-                WebSocketModule.send(videoData);
+                sendSignal(videoData);
             };
 
             reader.readAsDataURL(file);
@@ -93,7 +105,8 @@
 
     // 页面加载完成后初始化WebSocket连接
     window.addEventListener("load", function () {
-        WebSocketModule.init();
+        initSendSocket();
+        initReceiveSocket();
     });
 </script>
 </body>

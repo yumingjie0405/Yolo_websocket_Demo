@@ -18,9 +18,9 @@ model = YOLO('yolov8s.pt')
 # cap = cv2.VideoCapture("MOT16-03.mp4")
 '''
 # 设置RTSP路径或摄像头索引
-# rtsp_path = "videos/example.mp4"
+rtsp_path = "videos/example.mp4"
 # rtsp_path ="https://open.ys7.com/v3/openlive/K10170061_1_1.m3u8?expire=1717206565&id=586491899410382848&t=e862caf9959031a4c7b74c33388f2dcbf7bf5f358c5ed4022861c20aa1766100&ev=100"
-rtsp_path = 0
+# rtsp_path = 0
 camera1 = None
 frame = None
 base64img = ''

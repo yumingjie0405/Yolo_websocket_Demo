@@ -1,7 +1,7 @@
 import cv2
 
 # 视频路径
-video_path = 'videos/example.mp4'
+video_path = 0
 
 # 打开视频文件
 cap = cv2.VideoCapture(video_path)

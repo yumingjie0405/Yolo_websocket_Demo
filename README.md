@@ -6,8 +6,7 @@
 <br>
 
 <h4>
-<center><font face="楷体">
-    安徽信息工程学院   芜湖北斗实验室  © </font>
+
 <center>    
 </h4>
 <h4>
